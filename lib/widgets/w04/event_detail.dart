@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import '../../theme/watch_theme.dart';
 import '../../models/models.dart';
 
-/// Overlay de detalle de evento (se muestra al tocar un EventTile)
 class EventDetail extends StatelessWidget {
   final AgendaEvent event;
   final VoidCallback onClose;
+  final VoidCallback onViewMap;
 
   const EventDetail({
     super.key,
     required this.event,
     required this.onClose,
+    required this.onViewMap,
   });
 
   @override
@@ -56,25 +57,55 @@ class EventDetail extends StatelessWidget {
                 text: '${event.time} – ${event.endTime}'),
             DetailRow(icon: Icons.timelapse, text: event.duration),
             const SizedBox(height: 6),
-            GestureDetector(
-              onTap: onClose,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-                decoration: BoxDecoration(
-                  color: WatchColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                      color: WatchColors.primary.withValues(alpha: 0.3)),
-                ),
-                child: const Text(
-                  'Cerrar',
-                  style: TextStyle(
-                    color: WatchColors.primary,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+                  onTap: onClose,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: WatchColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: WatchColors.border),
+                    ),
+                    child: const Text(
+                      'Cerrar',
+                      style: TextStyle(
+                        color: WatchColors.textSecondary,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                GestureDetector(
+                  onTap: onViewMap,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [WatchColors.primary, Color(0xFF5A3CD0)],
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.map_rounded, color: Colors.white, size: 9),
+                        SizedBox(width: 4),
+                        Text(
+                          'Ver Mapa',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -83,7 +114,6 @@ class EventDetail extends StatelessWidget {
   }
 }
 
-/// Fila de detalle con ícono y texto
 class DetailRow extends StatelessWidget {
   final IconData icon;
   final String text;

@@ -8,6 +8,7 @@ import 'screens/w04_agenda_screen.dart';
 import 'screens/w05_reminder_screen.dart';
 import 'screens/w06_map_screen.dart';
 import 'screens/w07_alert_screen.dart';
+import 'models/models.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,9 +55,20 @@ class WatchSimulatorPage extends StatefulWidget {
 
 class _WatchSimulatorPageState extends State<WatchSimulatorPage> {
   WatchScreen _current = WatchScreen.w01Pairing;
+  WatchScreen? _previous;
+  String? _highlightedMapLocation;
+  AgendaEvent? _selectedAgendaEvent;
 
   void _navigate(WatchScreen screen) {
-    setState(() => _current = screen);
+    setState(() {
+      _previous = _current;
+      _current = screen;
+      // Reset detail state when navigating away to general screens
+      if (screen != WatchScreen.w04Agenda && screen != WatchScreen.w06Map) {
+        _selectedAgendaEvent = null;
+        _highlightedMapLocation = null;
+      }
+    });
   }
 
   Widget _buildScreen() {
@@ -79,6 +91,20 @@ class _WatchSimulatorPageState extends State<WatchSimulatorPage> {
       case WatchScreen.w04Agenda:
         return W04AgendaScreen(
           onBack: () => _navigate(WatchScreen.w02Home),
+          initialSelectedEvent: _selectedAgendaEvent,
+          onEventSelected: (evt) {
+            setState(() {
+              _selectedAgendaEvent = evt;
+            });
+          },
+          onViewMap: (evt) {
+            setState(() {
+              _selectedAgendaEvent = evt;
+              _highlightedMapLocation = evt.location;
+              _previous = WatchScreen.w04Agenda;
+              _current = WatchScreen.w06Map;
+            });
+          },
         );
       case WatchScreen.w05Reminder:
         return W05ReminderScreen(
@@ -87,7 +113,14 @@ class _WatchSimulatorPageState extends State<WatchSimulatorPage> {
         );
       case WatchScreen.w06Map:
         return W06MapScreen(
+          highlightLocation: _highlightedMapLocation,
+          fromAgenda: _previous == WatchScreen.w04Agenda,
           onBack: () => _navigate(WatchScreen.w02Home),
+          onAgendaTap: () {
+            setState(() {
+              _current = WatchScreen.w04Agenda;
+            });
+          },
         );
       case WatchScreen.w07Alert:
         return W07AlertScreen(

@@ -5,8 +5,17 @@ import '../theme/watch_theme.dart';
 
 class W06MapScreen extends StatefulWidget {
   final VoidCallback? onBack;
+  final VoidCallback? onAgendaTap;
+  final String? highlightLocation;
+  final bool fromAgenda;
 
-  const W06MapScreen({super.key, this.onBack});
+  const W06MapScreen({
+    super.key,
+    this.onBack,
+    this.onAgendaTap,
+    this.highlightLocation,
+    this.fromAgenda = false,
+  });
 
   @override
   State<W06MapScreen> createState() => _W06MapScreenState();
@@ -46,7 +55,6 @@ class _W06MapScreenState extends State<W06MapScreen>
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           children: [
-            // Header
             Padding(
               padding: EdgeInsets.only(
                 top: WatchMetrics.edge(context) + 10,
@@ -90,7 +98,6 @@ class _W06MapScreenState extends State<W06MapScreen>
               ),
             ),
 
-            // Mapa interactivo
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
@@ -107,7 +114,10 @@ class _W06MapScreenState extends State<W06MapScreen>
                             constraints.maxWidth,
                             constraints.maxHeight,
                           ),
-                          painter: MapPainter(pulseAnim: _pulseAnim),
+                          painter: MapPainter(
+                            pulseAnim: _pulseAnim,
+                            highlightLocation: widget.highlightLocation,
+                          ),
                         ),
                       ),
                     );
@@ -116,7 +126,6 @@ class _W06MapScreenState extends State<W06MapScreen>
               ),
             ),
 
-            // Controles inferiores
             Padding(
               padding: EdgeInsets.only(
                 top: 6,
@@ -147,7 +156,7 @@ class _W06MapScreenState extends State<W06MapScreen>
                     ],
                   ),
                   GestureDetector(
-                    onTap: widget.onBack,
+                    onTap: widget.fromAgenda ? widget.onAgendaTap : widget.onBack,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 5),
@@ -163,14 +172,19 @@ class _W06MapScreenState extends State<W06MapScreen>
                           ),
                         ],
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(Icons.open_in_new,
-                              color: Colors.white, size: 10),
-                          SizedBox(width: 4),
+                          Icon(
+                            widget.fromAgenda
+                                ? Icons.calendar_today_rounded
+                                : Icons.open_in_new,
+                            color: Colors.white,
+                            size: 10,
+                          ),
+                          const SizedBox(width: 4),
                           Text(
-                            'TELÉFONO',
-                            style: TextStyle(
+                            widget.fromAgenda ? 'AGENDA' : 'TELÉFONO',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 8,
                               fontWeight: FontWeight.w700,

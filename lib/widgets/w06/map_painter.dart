@@ -2,18 +2,17 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../theme/watch_theme.dart';
 
-/// CustomPainter que dibuja el mapa del recinto con zonas, caminos y marcadores
 class MapPainter extends CustomPainter {
   final Animation<double> pulseAnim;
+  final String? highlightLocation;
 
-  MapPainter({required this.pulseAnim}) : super(repaint: pulseAnim);
+  MapPainter({required this.pulseAnim, this.highlightLocation}) : super(repaint: pulseAnim);
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
 
-    // Background grid — light style
     final gridPaint = Paint()
       ..color = const Color(0xFFCDD8E8)
       ..strokeWidth = 0.5;
@@ -24,7 +23,6 @@ class MapPainter extends CustomPainter {
       canvas.drawLine(Offset(0, y), Offset(w, y), gridPaint);
     }
 
-    // Zone definitions [Rect, Color, Label]
     final zones = [
       (
         Rect.fromLTWH(w * 0.3, h * 0.05, w * 0.4, h * 0.2),
@@ -96,7 +94,6 @@ class MapPainter extends CustomPainter {
       );
     }
 
-    // Roads
     final roadPaint = Paint()
       ..color = const Color(0xFFB0BEC5)
       ..strokeWidth = 5
@@ -112,8 +109,24 @@ class MapPainter extends CustomPainter {
       roadPaint,
     );
 
-    // Destination marker (Zona C)
-    final destCenter = Offset(w * 0.225, h * 0.58);
+    Offset destCenter = Offset(w * 0.225, h * 0.58); 
+    if (highlightLocation != null) {
+      final loc = highlightLocation!.toLowerCase();
+      if (loc.contains('escenario')) {
+        destCenter = Offset(w * 0.5, h * 0.15);
+      } else if (loc.contains('zona a')) {
+        destCenter = Offset(w * 0.15, h * 0.225);
+      } else if (loc.contains('servicios')) {
+        destCenter = Offset(w * 0.85, h * 0.175);
+      } else if (loc.contains('zona c')) {
+        destCenter = Offset(w * 0.225, h * 0.6);
+      } else if (loc.contains('jardín') || loc.contains('jardin')) {
+        destCenter = Offset(w * 0.575, h * 0.5);
+      } else if (loc.contains('entrada')) {
+        destCenter = Offset(w * 0.5, h * 0.84);
+      }
+    }
+
     final pulsePaint = Paint()
       ..color = WatchColors.warning
           .withValues(alpha: 0.35 * (1 - (pulseAnim.value - 0.6) / 0.6))
@@ -123,7 +136,6 @@ class MapPainter extends CustomPainter {
     canvas.drawCircle(destCenter, 8, Paint()..color = WatchColors.warning);
     canvas.drawCircle(destCenter, 3, Paint()..color = Colors.white);
 
-    // Current location marker
     final myLocCenter = Offset(w * 0.6, h * 0.58);
     canvas.drawCircle(myLocCenter, 6, Paint()..color = WatchColors.secondary);
     canvas.drawCircle(myLocCenter, 3, Paint()..color = Colors.white);

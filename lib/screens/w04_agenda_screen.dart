@@ -6,8 +6,17 @@ import '../widgets/widgets.dart';
 
 class W04AgendaScreen extends StatefulWidget {
   final VoidCallback onBack;
+  final Function(AgendaEvent event)? onViewMap;
+  final AgendaEvent? initialSelectedEvent;
+  final Function(AgendaEvent? event)? onEventSelected;
 
-  const W04AgendaScreen({super.key, required this.onBack});
+  const W04AgendaScreen({
+    super.key,
+    required this.onBack,
+    this.onViewMap,
+    this.initialSelectedEvent,
+    this.onEventSelected,
+  });
 
   @override
   State<W04AgendaScreen> createState() => _W04AgendaScreenState();
@@ -41,6 +50,11 @@ class _W04AgendaScreenState extends State<W04AgendaScreen>
       parent: _detailController,
       curve: Curves.easeOut,
     );
+
+    if (widget.initialSelectedEvent != null) {
+      _selectedEvent = widget.initialSelectedEvent;
+      _detailController.value = 1.0;
+    }
   }
 
   @override
@@ -51,12 +65,16 @@ class _W04AgendaScreenState extends State<W04AgendaScreen>
 
   void _showDetail(AgendaEvent event) {
     setState(() => _selectedEvent = event);
+    widget.onEventSelected?.call(event);
     _detailController.forward(from: 0);
   }
 
   void _hideDetail() {
     _detailController.reverse().then((_) {
-      if (mounted) setState(() => _selectedEvent = null);
+      if (mounted) {
+        setState(() => _selectedEvent = null);
+        widget.onEventSelected?.call(null);
+      }
     });
   }
 
@@ -198,7 +216,6 @@ class _W04AgendaScreenState extends State<W04AgendaScreen>
           ),
         ),
 
-        // Overlay de detalle
         if (_selectedEvent != null)
           FadeTransition(
             opacity: _detailAnim,
@@ -212,6 +229,11 @@ class _W04AgendaScreenState extends State<W04AgendaScreen>
                     child: EventDetail(
                       event: _selectedEvent!,
                       onClose: _hideDetail,
+                      onViewMap: () {
+                        if (widget.onViewMap != null && _selectedEvent != null) {
+                          widget.onViewMap!(_selectedEvent!);
+                        }
+                      },
                     ),
                   ),
                 ),
