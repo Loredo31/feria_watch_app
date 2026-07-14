@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import '../widgets/widgets.dart';
-import '../theme/watch_theme.dart';
+import 'package:provider/provider.dart';
+import '../../widgets/widgets.dart';
+import '../../theme/watch_theme.dart';
+import '../../providers/watch_state.dart';
+
 
 
 class W06MapScreen extends StatefulWidget {
@@ -140,7 +143,7 @@ class _W06MapScreenState extends State<W06MapScreen>
                         icon: Icons.add,
                         onTap: () {
                           final m = _transformController.value.clone();
-                          m.scale(1.3);
+                          m.scaleByDouble(1.3, 1.3, 1.3, 1.0);
                           _transformController.value = m;
                         },
                       ),
@@ -149,14 +152,27 @@ class _W06MapScreenState extends State<W06MapScreen>
                         icon: Icons.remove,
                         onTap: () {
                           final m = _transformController.value.clone();
-                          m.scale(0.77);
+                          m.scaleByDouble(0.77, 0.77, 0.77, 1.0);
                           _transformController.value = m;
                         },
                       ),
                     ],
                   ),
                   GestureDetector(
-                    onTap: widget.fromAgenda ? widget.onAgendaTap : widget.onBack,
+                    onTap: () {
+                      // Enviar comando remoto al teléfono para abrir el mapa interactivo
+                      context.read<WatchState>().sendRemoteCommand({
+                        'type': 'open_map',
+                        'location': widget.highlightLocation ?? 'Foro Principal (Escenario A)',
+                      });
+
+                      // Redirigir el reloj según procedencia
+                      if (widget.fromAgenda) {
+                        widget.onAgendaTap?.call();
+                      } else {
+                        widget.onBack?.call();
+                      }
+                    },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 5),
@@ -172,19 +188,17 @@ class _W06MapScreenState extends State<W06MapScreen>
                           ),
                         ],
                       ),
-                      child: Row(
+                      child: const Row(
                         children: [
                           Icon(
-                            widget.fromAgenda
-                                ? Icons.calendar_today_rounded
-                                : Icons.open_in_new,
+                            Icons.open_in_new,
                             color: Colors.white,
                             size: 10,
                           ),
-                          const SizedBox(width: 4),
+                          SizedBox(width: 4),
                           Text(
-                            widget.fromAgenda ? 'AGENDA' : 'TELÉFONO',
-                            style: const TextStyle(
+                            'TELÉFONO',
+                            style: TextStyle(
                               color: Colors.white,
                               fontSize: 8,
                               fontWeight: FontWeight.w700,

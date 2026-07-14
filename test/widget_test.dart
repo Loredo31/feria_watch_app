@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:feria_watch_app/main.dart';
-import 'package:feria_watch_app/screens/w03_tickets_screen.dart';
+import 'package:feria_watch_app/screens/w03/w03_tickets_screen.dart';
 
 void main() {
   testWidgets('App smoke test - verifies pairing screen loads', (WidgetTester tester) async {

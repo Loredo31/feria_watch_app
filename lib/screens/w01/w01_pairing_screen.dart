@@ -1,41 +1,18 @@
 import 'package:flutter/material.dart';
-import '../theme/watch_theme.dart';
-import '../widgets/widgets.dart';
+import 'package:provider/provider.dart';
+import '../../theme/watch_theme.dart';
+import '../../widgets/widgets.dart';
+import '../../providers/watch_state.dart';
 
-
-class W01PairingScreen extends StatefulWidget {
+class W01PairingScreen extends StatelessWidget {
   final VoidCallback onPaired;
 
   const W01PairingScreen({super.key, required this.onPaired});
 
   @override
-  State<W01PairingScreen> createState() => _W01PairingScreenState();
-}
-
-class _W01PairingScreenState extends State<W01PairingScreen> {
-  StatusType _status = StatusType.searching;
-  String _statusLabel = 'Buscando teléfono...';
-
-  void _simulatePairing() {
-    setState(() {
-      _status = StatusType.searching;
-      _statusLabel = 'Conectando...';
-    });
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          _status = StatusType.connected;
-          _statusLabel = 'Conectado';
-        });
-        Future.delayed(const Duration(milliseconds: 800), () {
-          if (mounted) widget.onPaired();
-        });
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final watchState = context.watch<WatchState>();
+
     return Container(
       decoration: const BoxDecoration(
         gradient: RadialGradient(
@@ -67,13 +44,19 @@ class _W01PairingScreenState extends State<W01PairingScreen> {
 
               const SizedBox(height: 8),
 
-              StatusIndicator(label: _statusLabel, type: _status),
+              StatusIndicator(
+                label: watchState.connectionStatus,
+                type: watchState.connectionType,
+              ),
 
               const SizedBox(height: 10),
 
               WatchButton(
                 label: 'VINCULAR AHORA',
-                onTap: _simulatePairing,
+                onTap: () {
+                  watchState.connect();
+                  watchState.requestManualSync();
+                },
                 color: WatchColors.primary,
                 icon: Icons.bluetooth,
               ),
@@ -84,3 +67,4 @@ class _W01PairingScreenState extends State<W01PairingScreen> {
     );
   }
 }
+

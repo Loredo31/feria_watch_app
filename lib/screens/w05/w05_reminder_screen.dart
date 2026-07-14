@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../widgets/widgets.dart';
-import '../theme/watch_theme.dart';
+import 'package:provider/provider.dart';
+import '../../widgets/widgets.dart';
+import '../../theme/watch_theme.dart';
+import '../../providers/watch_state.dart';
 
 class W05ReminderScreen extends StatelessWidget {
   final VoidCallback onViewMap;
@@ -14,6 +16,13 @@ class W05ReminderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final watchState = context.watch<WatchState>();
+    final active = watchState.activeReminder;
+
+    final title = active?.name ?? 'Concierto de Mariachi';
+    final location = active?.location ?? 'Escenario Principal';
+    final minutes = watchState.reminderMinutes;
+
     return Container(
       decoration: const BoxDecoration(
         gradient: RadialGradient(
@@ -45,10 +54,10 @@ class W05ReminderScreen extends StatelessWidget {
 
               const SizedBox(height: 4),
 
-              const Text(
-                'Concierto de Mariachi',
+              Text(
+                title,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: WatchColors.textPrimary,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -57,9 +66,9 @@ class W05ReminderScreen extends StatelessWidget {
 
               const SizedBox(height: 2),
 
-              const Text(
-                'Escenario Principal',
-                style: TextStyle(
+              Text(
+                location,
+                style: const TextStyle(
                   color: WatchColors.textSecondary,
                   fontSize: 9,
                 ),
@@ -68,7 +77,21 @@ class W05ReminderScreen extends StatelessWidget {
               const SizedBox(height: 6),
 
               // Badge de tiempo restante
-              const TimerBadge(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: WatchColors.warning.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'Comienza en $minutes min',
+                  style: const TextStyle(
+                    color: WatchColors.warning,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
 
               const SizedBox(height: 10),
 
@@ -99,3 +122,4 @@ class W05ReminderScreen extends StatelessWidget {
     );
   }
 }
+

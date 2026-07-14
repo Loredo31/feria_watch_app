@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../theme/watch_theme.dart';
-import '../models/models.dart';
-import '../widgets/widgets.dart';
+import 'package:provider/provider.dart';
+import '../../theme/watch_theme.dart';
+import '../../widgets/widgets.dart';
+import '../../providers/watch_state.dart';
 
 class W03TicketsScreen extends StatefulWidget {
   final VoidCallback onBack;
@@ -22,8 +23,7 @@ class _W03TicketsScreenState extends State<W03TicketsScreen>
   @override
   void initState() {
     super.initState();
-    final initialPage = mockTickets.isNotEmpty ? mockTickets.length * 1000 : 0;
-    _pageController = PageController(initialPage: initialPage);
+    _pageController = PageController(initialPage: 0);
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
@@ -54,6 +54,73 @@ class _W03TicketsScreenState extends State<W03TicketsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final watchState = context.watch<WatchState>();
+    final ticketsList = watchState.tickets;
+
+    if (ticketsList.isEmpty) {
+      return Container(
+        color: WatchColors.background,
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: WatchMetrics.side(context)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.qr_code, color: WatchColors.textMuted, size: 24),
+                const SizedBox(height: 6),
+                const Text(
+                  'Sin boletos',
+                  style: TextStyle(
+                    color: WatchColors.textPrimary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                const Text(
+                  'Compra o reserva en tu teléfono para sincronizar',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: WatchColors.textMuted,
+                    fontSize: 8,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: widget.onBack,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: WatchColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: WatchColors.border),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.arrow_back_ios_new_rounded,
+                            color: WatchColors.textSecondary, size: 8),
+                        SizedBox(width: 3),
+                        Text(
+                          'VOLVER',
+                          style: TextStyle(
+                            color: WatchColors.textSecondary,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
       color: WatchColors.background,
       child: Column(
@@ -77,7 +144,7 @@ class _W03TicketsScreenState extends State<W03TicketsScreen>
           // Indicadores de página
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(mockTickets.length, (i) {
+            children: List.generate(ticketsList.length, (i) {
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 margin: const EdgeInsets.symmetric(horizontal: 2),
@@ -100,17 +167,17 @@ class _W03TicketsScreenState extends State<W03TicketsScreen>
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (i) {
-                if (mockTickets.isNotEmpty) {
-                  setState(() => _currentPage = i % mockTickets.length);
+                if (ticketsList.isNotEmpty) {
+                  setState(() => _currentPage = i % ticketsList.length);
                 }
                 _fadeController.reset();
                 _fadeController.forward();
               },
               itemBuilder: (context, index) {
-                if (mockTickets.isEmpty) {
+                if (ticketsList.isEmpty) {
                   return const SizedBox.shrink();
                 }
-                final ticket = mockTickets[index % mockTickets.length];
+                final ticket = ticketsList[index % ticketsList.length];
                 return FadeTransition(
                   opacity: _fadeAnim,
                   child: LayoutBuilder(
@@ -136,21 +203,22 @@ class _W03TicketsScreenState extends State<W03TicketsScreen>
           ),
 
           // Hint de deslizar
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.chevron_left, color: WatchColors.textMuted, size: 12),
-                Text(
-                  'desliza para ver más',
-                  style: TextStyle(color: WatchColors.textMuted, fontSize: 8),
-                ),
-                Icon(Icons.chevron_right,
-                    color: WatchColors.textMuted, size: 12),
-              ],
+          if (ticketsList.length > 1)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.chevron_left, color: WatchColors.textMuted, size: 12),
+                  Text(
+                    'desliza para ver más',
+                    style: TextStyle(color: WatchColors.textMuted, fontSize: 8),
+                  ),
+                  Icon(Icons.chevron_right,
+                      color: WatchColors.textMuted, size: 12),
+                ],
+              ),
             ),
-          ),
 
           // Botón de regreso — hasta el final de la pantalla
           Padding(

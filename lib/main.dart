@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'theme/watch_theme.dart';
-import 'screens/w01_pairing_screen.dart';
-import 'screens/w02_home_screen.dart';
-import 'screens/w03_tickets_screen.dart';
-import 'screens/w04_agenda_screen.dart';
-import 'screens/w05_reminder_screen.dart';
-import 'screens/w06_map_screen.dart';
-import 'screens/w07_alert_screen.dart';
+import 'screens/screens.dart';
 import 'models/models.dart';
+import 'providers/watch_state.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,11 +22,14 @@ class FeriaWatchApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mi Feria Inteligente — Smartwatch',
-      debugShowCheckedModeBanner: false,
-      theme: WatchTheme.theme,
-      home: const WatchSimulatorPage(),
+    return ChangeNotifierProvider<WatchState>(
+      create: (_) => WatchState(),
+      child: MaterialApp(
+        title: 'Mi Feria Inteligente — Smartwatch',
+        debugShowCheckedModeBanner: false,
+        theme: WatchTheme.theme,
+        home: const WatchSimulatorPage(),
+      ),
     );
   }
 }
@@ -108,8 +107,18 @@ class _WatchSimulatorPageState extends State<WatchSimulatorPage> {
         );
       case WatchScreen.w05Reminder:
         return W05ReminderScreen(
-          onViewMap: () => _navigate(WatchScreen.w06Map),
-          onDismiss: () => _navigate(WatchScreen.w02Home),
+          onViewMap: () {
+            setState(() {
+              final active = context.read<WatchState>().activeReminder;
+              _highlightedMapLocation = active?.location ?? 'Escenario Principal';
+              _previous = WatchScreen.w05Reminder;
+              _current = WatchScreen.w06Map;
+            });
+          },
+          onDismiss: () {
+            context.read<WatchState>().dismissReminder();
+            _navigate(WatchScreen.w02Home);
+          },
         );
       case WatchScreen.w06Map:
         return W06MapScreen(
@@ -124,18 +133,70 @@ class _WatchSimulatorPageState extends State<WatchSimulatorPage> {
         );
       case WatchScreen.w07Alert:
         return W07AlertScreen(
-          onDismiss: () => _navigate(WatchScreen.w02Home),
+          onDismiss: () {
+            context.read<WatchState>().dismissAlert();
+            _navigate(WatchScreen.w02Home);
+          },
+          onViewMap: (location) {
+            setState(() {
+              _highlightedMapLocation = location;
+              _previous = WatchScreen.w07Alert;
+              _current = WatchScreen.w06Map;
+            });
+          },
         );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // La pantalla física del reloj YA es redonda (el hardware/emulador
-    // recorta las esquinas). Aquí solo llenamos ese rectángulo lógico
-    // completo, sin cabecera de teléfono ni círculo decorativo extra:
-    // eso era lo que sobraba y hacía que el contenido se viera
-    // desproporcionado/alargado dentro del emulador Wear OS.
+    final watchState = context.watch<WatchState>();
+
+    // Control de flujo reactivo automático basado en conexión y sesión del teléfono
+    if (!watchState.isLoggedIn || !watchState.wearConnected) {
+      if (_current != WatchScreen.w01Pairing) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _current = WatchScreen.w01Pairing;
+            });
+          }
+        });
+      }
+    } else if (_current == WatchScreen.w01Pairing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _current = WatchScreen.w02Home;
+          });
+        }
+      });
+    }
+
+    // Auto-disparadores de alertas y recordatorios entrantes
+    if (watchState.activeAlert != null && 
+        _current != WatchScreen.w07Alert && 
+        _current != WatchScreen.w06Map) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _current = WatchScreen.w07Alert;
+          });
+        }
+      });
+    } else if (watchState.activeReminder != null && 
+               _current != WatchScreen.w05Reminder && 
+               _current != WatchScreen.w06Map &&
+               watchState.activeAlert == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _current = WatchScreen.w05Reminder;
+          });
+        }
+      });
+    }
+
     final bool canPopDirectly = _current == WatchScreen.w01Pairing || _current == WatchScreen.w02Home;
 
     return PopScope(

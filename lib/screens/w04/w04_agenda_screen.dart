@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../models/models.dart';
-import '../theme/watch_theme.dart';
-import '../widgets/widgets.dart';
-
+import 'package:provider/provider.dart';
+import '../../models/models.dart';
+import '../../theme/watch_theme.dart';
+import '../../widgets/widgets.dart';
+import '../../providers/watch_state.dart';
 
 class W04AgendaScreen extends StatefulWidget {
   final VoidCallback onBack;
@@ -28,13 +29,13 @@ class _W04AgendaScreenState extends State<W04AgendaScreen>
   late AnimationController _detailController;
   late Animation<double> _detailAnim;
 
-  List<AgendaEvent> get _sortedEvents {
+  List<AgendaEvent> _getSortedEvents(List<AgendaEvent> events) {
     final order = {
       EventStatus.ongoing: 0,
       EventStatus.upcoming: 1,
       EventStatus.finished: 2,
     };
-    final sorted = List<AgendaEvent>.from(mockAgendaEvents);
+    final sorted = List<AgendaEvent>.from(events);
     sorted.sort((a, b) => order[a.status]!.compareTo(order[b.status]!));
     return sorted;
   }
@@ -102,6 +103,78 @@ class _W04AgendaScreenState extends State<W04AgendaScreen>
 
   @override
   Widget build(BuildContext context) {
+    final watchState = context.watch<WatchState>();
+    final sortedEvents = _getSortedEvents(watchState.agendaEvents);
+
+    if (sortedEvents.isEmpty) {
+      return Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFE8F5E9), WatchColors.background],
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: WatchMetrics.side(context)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.event_busy, color: WatchColors.textMuted, size: 24),
+                const SizedBox(height: 6),
+                const Text(
+                  'Agenda vacía',
+                  style: TextStyle(
+                    color: WatchColors.textPrimary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                const Text(
+                  'Marca favoritos en tu teléfono para sincronizar',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: WatchColors.textMuted,
+                    fontSize: 8,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: widget.onBack,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: WatchColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: WatchColors.border),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.arrow_back_ios_new_rounded,
+                            color: WatchColors.textSecondary, size: 8),
+                        SizedBox(width: 3),
+                        Text(
+                          'VOLVER',
+                          style: TextStyle(
+                            color: WatchColors.textSecondary,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Stack(
       children: [
         Container(
@@ -161,9 +234,9 @@ class _W04AgendaScreenState extends State<W04AgendaScreen>
                       top: 4,
                       bottom: WatchMetrics.edge(context) + 14,
                     ),
-                    itemCount: _sortedEvents.length + 1,
+                    itemCount: sortedEvents.length + 1,
                     itemBuilder: (context, index) {
-                      if (index == _sortedEvents.length) {
+                      if (index == sortedEvents.length) {
                         return Padding(
                           padding: const EdgeInsets.only(top: 10),
                           child: Center(
@@ -201,7 +274,7 @@ class _W04AgendaScreenState extends State<W04AgendaScreen>
                           ),
                         );
                       }
-                      final event = _sortedEvents[index];
+                      final event = sortedEvents[index];
                       return EventTile(
                         event: event,
                         statusColor: _statusColor(event.status),

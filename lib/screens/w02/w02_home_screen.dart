@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../theme/watch_theme.dart';
-import '../models/models.dart';
-import '../widgets/widgets.dart';
+import 'package:provider/provider.dart';
+import '../../theme/watch_theme.dart';
+import '../../models/models.dart';
+import '../../widgets/widgets.dart';
+import '../../providers/watch_state.dart';
+
 
 
 class W02HomeScreen extends StatefulWidget {
@@ -61,16 +64,17 @@ class _W02HomeScreenState extends State<W02HomeScreen>
   }
 
   String _formatTime(DateTime dt) =>
-      '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
-  AgendaEvent get _nextEvent => mockAgendaEvents.firstWhere(
-        (e) => e.status == EventStatus.upcoming,
-        orElse: () => mockAgendaEvents.first,
-      );
+      '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) {
-    final next = _nextEvent;
+    final watchState = context.watch<WatchState>();
+    
+    // Encontrar el próximo evento upcoming en la agenda del usuario
+    final next = watchState.agendaEvents.where((e) => e.status == EventStatus.upcoming).firstOrNull ??
+                 (watchState.agendaEvents.isNotEmpty ? watchState.agendaEvents.first : null);
+
     return Container(
       decoration: const BoxDecoration(
         gradient: RadialGradient(
@@ -91,14 +95,31 @@ class _W02HomeScreenState extends State<W02HomeScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Mi Feria',
-                      style: TextStyle(
-                        color: WatchColors.primary,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Mi Feria',
+                          style: TextStyle(
+                            color: WatchColors.primary,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        Text(
+                          watchState.connectionType == StatusType.connected
+                              ? 'Sincronizado'
+                              : 'Sin conexión',
+                          style: TextStyle(
+                            color: watchState.connectionType == StatusType.connected
+                                ? WatchColors.secondary
+                                : WatchColors.alert,
+                            fontSize: 7,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                     Text(
                       _currentTime,
@@ -114,7 +135,39 @@ class _W02HomeScreenState extends State<W02HomeScreen>
                 const SizedBox(height: 5),
 
                 // Tarjeta del próximo evento
-                NextEventCard(event: next, countdown: _countdown),
+                if (next != null)
+                  NextEventCard(event: next, countdown: _countdown)
+                else
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: WatchColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: WatchColors.border),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.event_busy, color: WatchColors.textMuted, size: 14),
+                        SizedBox(height: 3),
+                        Text(
+                          'Sin eventos en agenda',
+                          style: TextStyle(
+                            color: WatchColors.textPrimary,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          'Agrega favoritos en tu móvil',
+                          style: TextStyle(
+                            color: WatchColors.textMuted,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
                 const SizedBox(height: 6),
 
@@ -189,13 +242,7 @@ class _W02HomeScreenState extends State<W02HomeScreen>
                   ),
                 ),
 
-                const SizedBox(height: 6),
 
-                // Botones de simulación
-                SimulationButtons(
-                  onReminderTap: widget.onReminderTap,
-                  onAlertTap: widget.onAlertTap,
-                ),
               ],
             ),
           ),
@@ -204,3 +251,4 @@ class _W02HomeScreenState extends State<W02HomeScreen>
     );
   }
 }
+

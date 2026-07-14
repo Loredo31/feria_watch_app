@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
-import '../models/models.dart';
-import '../widgets/widgets.dart';
-import '../theme/watch_theme.dart';
+import 'package:provider/provider.dart';
+import '../../models/models.dart';
+import '../../widgets/widgets.dart';
+import '../../theme/watch_theme.dart';
+import '../../providers/watch_state.dart';
 
 class W07AlertScreen extends StatefulWidget {
   final VoidCallback onDismiss;
+  final Function(String location)? onViewMap;
   final AlertModel? alert;
 
   const W07AlertScreen({
     super.key,
     required this.onDismiss,
+    this.onViewMap,
     this.alert,
   });
 
@@ -26,13 +30,12 @@ class _W07AlertScreenState extends State<W07AlertScreen>
   late Animation<double> _shakeAnim;
   late Animation<double> _iconAnim;
 
-  late AlertModel _currentAlert;
+  AlertModel? _currentAlert;
   bool _showHistory = false;
 
   @override
   void initState() {
     super.initState();
-    _currentAlert = widget.alert ?? mockAlerts.first;
 
     _pulseController = AnimationController(
       vsync: this,
@@ -64,6 +67,17 @@ class _W07AlertScreenState extends State<W07AlertScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_currentAlert == null) {
+      final state = Provider.of<WatchState>(context);
+      _currentAlert = widget.alert ??
+          state.activeAlert ??
+          (state.alerts.isNotEmpty ? state.alerts.first : mockAlerts.first);
+    }
+  }
+
+  @override
   void dispose() {
     _pulseController.dispose();
     _shakeController.dispose();
@@ -71,13 +85,29 @@ class _W07AlertScreenState extends State<W07AlertScreen>
     super.dispose();
   }
 
-  Color get _alertColor => _currentAlert.urgency == AlertUrgency.emergency
-      ? WatchColors.alert
-      : WatchColors.warning;
+  Color get _alertColor {
+    final alert = _currentAlert ?? mockAlerts.first;
+    return alert.urgency == AlertUrgency.emergency
+        ? WatchColors.alert
+        : WatchColors.warning;
+  }
 
-  Color get _bgColor => _currentAlert.urgency == AlertUrgency.emergency
-      ? const Color(0xFFFFF0F0)
-      : const Color(0xFFFFFAE0);
+  Color get _bgColor {
+    final alert = _currentAlert ?? mockAlerts.first;
+    return alert.urgency == AlertUrgency.emergency
+        ? const Color(0xFFFFF0F0)
+        : const Color(0xFFFFFAE0);
+  }
+
+  String get _alertLocation {
+    final alert = _currentAlert ?? mockAlerts.first;
+    final msg = '${alert.message} ${alert.fullMessage}'.toLowerCase();
+    if (msg.contains('zona norte')) return 'Zona Norte';
+    if (msg.contains('zona sur')) return 'Zona Sur';
+    if (msg.contains('zona a')) return 'Zona A';
+    if (msg.contains('escenario principal')) return 'Escenario Principal';
+    return 'Foro Principal (Escenario A)';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +133,7 @@ class _W07AlertScreenState extends State<W07AlertScreen>
   }
 
   Widget _buildAlert() {
+    final alert = _currentAlert ?? mockAlerts.first;
     return AnimatedBuilder(
       animation: _shakeAnim,
       builder: (_, child) => Transform.translate(
@@ -118,7 +149,7 @@ class _W07AlertScreenState extends State<W07AlertScreen>
               // Ícono de alerta
               AlertIcon(
                 scaleAnim: _iconAnim,
-                urgency: _currentAlert.urgency,
+                urgency: alert.urgency,
               ),
 
               const SizedBox(height: 5),
@@ -136,7 +167,7 @@ class _W07AlertScreenState extends State<W07AlertScreen>
               const SizedBox(height: 4),
 
               Text(
-                _currentAlert.message,
+                alert.message,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -150,7 +181,7 @@ class _W07AlertScreenState extends State<W07AlertScreen>
               const SizedBox(height: 3),
 
               Text(
-                _currentAlert.timestamp,
+                alert.timestamp,
                 style: const TextStyle(
                   color: WatchColors.textMuted,
                   fontSize: 8,
@@ -164,7 +195,15 @@ class _W07AlertScreenState extends State<W07AlertScreen>
                 children: [
                   WatchButton(
                     label: 'VER MÁS',
-                    onTap: () => setState(() => _showHistory = true),
+                    onTap: () {
+                      // Enviar comando remoto al teléfono
+                      context.read<WatchState>().sendRemoteCommand({
+                        'type': 'open_notification',
+                        'alertId': alert.id,
+                        'message': alert.fullMessage,
+                      });
+                      setState(() => _showHistory = true);
+                    },
                     color: _alertColor,
                     icon: Icons.info_outline,
                     small: true,
@@ -187,6 +226,9 @@ class _W07AlertScreenState extends State<W07AlertScreen>
   }
 
   Widget _buildHistory() {
+    final watchState = context.watch<WatchState>();
+    final alertsList = watchState.alerts.isNotEmpty ? watchState.alerts : mockAlerts;
+
     return Column(
       children: [
         Padding(
@@ -221,13 +263,13 @@ class _W07AlertScreenState extends State<W07AlertScreen>
         const Divider(color: WatchColors.border, height: 1),
         Expanded(
           child: ListView.builder(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               top: 4,
-              bottom: WatchMetrics.edge(context) + 14,
+              bottom: 4,
             ),
-            itemCount: mockAlerts.length,
+            itemCount: alertsList.length,
             itemBuilder: (context, index) {
-              final alert = mockAlerts[index];
+              final alert = alertsList[index];
               return AlertHistoryItem(
                 alert: alert,
                 onTap: () => setState(() {
@@ -238,7 +280,37 @@ class _W07AlertScreenState extends State<W07AlertScreen>
             },
           ),
         ),
+        Padding(
+          padding: EdgeInsets.only(
+            bottom: WatchMetrics.edge(context) + 10,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              WatchButton(
+                label: 'VER MAPA',
+                onTap: () {
+                  if (widget.onViewMap != null) {
+                    widget.onViewMap!(_alertLocation);
+                  }
+                },
+                color: WatchColors.primary,
+                icon: Icons.map_outlined,
+                small: true,
+              ),
+              const SizedBox(height: 4),
+              WatchButton(
+                label: 'OK',
+                onTap: widget.onDismiss,
+                color: _alertColor,
+                icon: Icons.check_circle_outline,
+                small: true,
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
 }
+
