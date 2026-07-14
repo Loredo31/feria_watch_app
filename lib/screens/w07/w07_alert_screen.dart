@@ -73,7 +73,7 @@ class _W07AlertScreenState extends State<W07AlertScreen>
       final state = Provider.of<WatchState>(context);
       _currentAlert = widget.alert ??
           state.activeAlert ??
-          (state.alerts.isNotEmpty ? state.alerts.first : mockAlerts.first);
+          (state.alerts.isNotEmpty ? state.alerts.first : null);
     }
   }
 
@@ -86,21 +86,24 @@ class _W07AlertScreenState extends State<W07AlertScreen>
   }
 
   Color get _alertColor {
-    final alert = _currentAlert ?? mockAlerts.first;
+    final alert = _currentAlert;
+    if (alert == null) return WatchColors.primary;
     return alert.urgency == AlertUrgency.emergency
         ? WatchColors.alert
         : WatchColors.warning;
   }
 
   Color get _bgColor {
-    final alert = _currentAlert ?? mockAlerts.first;
+    final alert = _currentAlert;
+    if (alert == null) return WatchColors.background;
     return alert.urgency == AlertUrgency.emergency
         ? const Color(0xFFFFF0F0)
         : const Color(0xFFFFFAE0);
   }
 
   String get _alertLocation {
-    final alert = _currentAlert ?? mockAlerts.first;
+    final alert = _currentAlert;
+    if (alert == null) return 'Foro Principal (Escenario A)';
     final msg = '${alert.message} ${alert.fullMessage}'.toLowerCase();
     if (msg.contains('zona norte')) return 'Zona Norte';
     if (msg.contains('zona sur')) return 'Zona Sur';
@@ -133,7 +136,48 @@ class _W07AlertScreenState extends State<W07AlertScreen>
   }
 
   Widget _buildAlert() {
-    final alert = _currentAlert ?? mockAlerts.first;
+    final alert = _currentAlert;
+    if (alert == null) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: WatchMetrics.side(context)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.notifications_off_outlined,
+                  color: WatchColors.textMuted, size: 24),
+              const SizedBox(height: 6),
+              const Text(
+                'Sin alertas activas',
+                style: TextStyle(
+                  color: WatchColors.textPrimary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 3),
+              const Text(
+                'Recibirás notificaciones en tiempo real aquí',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: WatchColors.textMuted,
+                  fontSize: 8,
+                ),
+              ),
+              const SizedBox(height: 10),
+              WatchButton(
+                label: 'CERRAR',
+                onTap: widget.onDismiss,
+                color: WatchColors.surfaceLight,
+                textColor: WatchColors.textSecondary,
+                small: true,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return AnimatedBuilder(
       animation: _shakeAnim,
       builder: (_, child) => Transform.translate(
@@ -150,9 +194,7 @@ class _W07AlertScreenState extends State<W07AlertScreen>
                 scaleAnim: _iconAnim,
                 urgency: alert.urgency,
               ),
-
               const SizedBox(height: 5),
-
               Text(
                 '¡Alerta urgente!',
                 style: TextStyle(
@@ -162,9 +204,7 @@ class _W07AlertScreenState extends State<W07AlertScreen>
                   letterSpacing: 0.5,
                 ),
               ),
-
               const SizedBox(height: 4),
-
               Text(
                 alert.message,
                 textAlign: TextAlign.center,
@@ -176,9 +216,7 @@ class _W07AlertScreenState extends State<W07AlertScreen>
                   height: 1.4,
                 ),
               ),
-
               const SizedBox(height: 3),
-
               Text(
                 alert.timestamp,
                 style: const TextStyle(
@@ -186,9 +224,7 @@ class _W07AlertScreenState extends State<W07AlertScreen>
                   fontSize: 8,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -225,7 +261,85 @@ class _W07AlertScreenState extends State<W07AlertScreen>
 
   Widget _buildHistory() {
     final watchState = context.watch<WatchState>();
-    final alertsList = watchState.alerts.isNotEmpty ? watchState.alerts : mockAlerts;
+    final alertsList = watchState.alerts;
+
+    if (alertsList.isEmpty) {
+      return Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(
+              top: WatchMetrics.edge(context) + 10,
+              left: 16,
+              right: 16,
+              bottom: 6,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Historial',
+                  style: TextStyle(
+                    color: WatchColors.textPrimary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => setState(() => _showHistory = false),
+                  child: const Icon(
+                    Icons.close,
+                    color: WatchColors.textMuted,
+                    size: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(color: WatchColors.border, height: 1),
+          const Expanded(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.notifications_off_outlined,
+                      color: WatchColors.textMuted, size: 24),
+                  SizedBox(height: 6),
+                  Text(
+                    'Historial vacío',
+                    style: TextStyle(
+                      color: WatchColors.textPrimary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'No se han recibido avisos aún',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: WatchColors.textMuted,
+                      fontSize: 8,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: WatchMetrics.edge(context) + 10,
+            ),
+            child: WatchButton(
+              label: 'VOLVER',
+              onTap: () => setState(() => _showHistory = false),
+              color: WatchColors.surfaceLight,
+              textColor: WatchColors.textSecondary,
+              small: true,
+            ),
+          ),
+        ],
+      );
+    }
 
     return Column(
       children: [
@@ -311,4 +425,3 @@ class _W07AlertScreenState extends State<W07AlertScreen>
     );
   }
 }
-
