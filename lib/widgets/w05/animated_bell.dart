@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/watch_theme.dart';
 
-/// Campana animada con efecto de rotación y resplandor para la pantalla de recordatorio
 class AnimatedBell extends StatefulWidget {
   const AnimatedBell({super.key});
 

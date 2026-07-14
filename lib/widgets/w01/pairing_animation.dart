@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../theme/watch_theme.dart';
 
-/// Animación de vinculación: reloj ↔ punto bluetooth ↔ teléfono
 class PairingAnimation extends StatefulWidget {
   const PairingAnimation({super.key});
 
@@ -61,7 +60,6 @@ class _PairingAnimationState extends State<PairingAnimation>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Orbiting bluetooth dot
           AnimatedBuilder(
             animation: _orbitAnim,
             builder: (_, __) {
@@ -90,7 +88,6 @@ class _PairingAnimationState extends State<PairingAnimation>
               );
             },
           ),
-          // Watch icon
           Positioned(
             left: 0,
             child: ScaleTransition(
@@ -112,7 +109,6 @@ class _PairingAnimationState extends State<PairingAnimation>
               ),
             ),
           ),
-          // Arrow
           const Positioned(
             left: 44,
             child: Icon(
@@ -121,7 +117,6 @@ class _PairingAnimationState extends State<PairingAnimation>
               size: 14,
             ),
           ),
-          // Phone icon
           Positioned(
             right: 0,
             child: Container(

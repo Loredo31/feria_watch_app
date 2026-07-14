@@ -10,7 +10,6 @@ class WatchState extends ChangeNotifier {
   bool _isConnecting = false;
   Timer? _reconnectTimer;
 
-  // Estado sincronizado desde el teléfono
   bool isLoggedIn = false;
   bool isVisitor = false;
   String? userName;
@@ -18,16 +17,13 @@ class WatchState extends ChangeNotifier {
   bool wearConnected = false;
   int reminderMinutes = 10;
 
-  // Listas de datos dinámicos
   List<TicketModel> tickets = [];
   List<AgendaEvent> agendaEvents = [];
   List<AlertModel> alerts = [];
 
-  // Alertas / Notificaciones activas en pantalla
   AlertModel? activeAlert;
   AgendaEvent? activeReminder;
 
-  // Estado de conexión del reloj
   String connectionStatus = 'Buscando teléfono...';
   StatusType connectionType = StatusType.searching;
 
@@ -77,7 +73,6 @@ class WatchState extends ChangeNotifier {
     wearConnected = false;
     notifyListeners();
 
-    // Reintentar conexión en 5 segundos
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(const Duration(seconds: 5), () {
       connect();
@@ -159,7 +154,6 @@ class WatchState extends ChangeNotifier {
           timestamp: alertData['timestamp'] ?? _formatTime(DateTime.now()),
         );
         
-        // Agregar a la lista de alertas
         if (!alerts.any((a) => a.id == newAlert.id)) {
           alerts.insert(0, newAlert);
         }
@@ -185,7 +179,6 @@ class WatchState extends ChangeNotifier {
     }
   }
 
-  // Descartar alerta activa
   void dismissAlert() {
     activeAlert = null;
     if (_channel != null) {
@@ -196,7 +189,6 @@ class WatchState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Descartar recordatorio activo
   void dismissReminder() {
     activeReminder = null;
     if (_channel != null) {
@@ -207,7 +199,6 @@ class WatchState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Enviar comando remoto al teléfono móvil
   void sendRemoteCommand(Map<String, dynamic> command) {
     if (_channel != null) {
       try {
@@ -216,7 +207,6 @@ class WatchState extends ChangeNotifier {
     }
   }
 
-  // Forzar sincronización manual
   void requestManualSync() {
     sendRemoteCommand({'type': 'request_sync'});
   }

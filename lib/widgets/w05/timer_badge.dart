@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/watch_theme.dart';
 
-/// Badge de cuenta regresiva: "Comienza en X minutos"
 class TimerBadge extends StatelessWidget {
   final String label;
 

@@ -160,13 +160,11 @@ class _W06MapScreenState extends State<W06MapScreen>
                   ),
                   GestureDetector(
                     onTap: () {
-                      // Enviar comando remoto al teléfono para abrir el mapa interactivo
                       context.read<WatchState>().sendRemoteCommand({
                         'type': 'open_map',
                         'location': widget.highlightLocation ?? 'Foro Principal (Escenario A)',
                       });
 
-                      // Redirigir el reloj según procedencia
                       if (widget.fromAgenda) {
                         widget.onAgendaTap?.call();
                       } else {

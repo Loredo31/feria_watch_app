@@ -146,7 +146,6 @@ class _W07AlertScreenState extends State<W07AlertScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Ícono de alerta
               AlertIcon(
                 scaleAnim: _iconAnim,
                 urgency: alert.urgency,
@@ -196,7 +195,6 @@ class _W07AlertScreenState extends State<W07AlertScreen>
                   WatchButton(
                     label: 'VER MÁS',
                     onTap: () {
-                      // Enviar comando remoto al teléfono
                       context.read<WatchState>().sendRemoteCommand({
                         'type': 'open_notification',
                         'alertId': alert.id,

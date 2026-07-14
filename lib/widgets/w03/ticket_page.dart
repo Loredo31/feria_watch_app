@@ -3,7 +3,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../theme/watch_theme.dart';
 import '../../models/models.dart';
 
-/// Página individual de boleto con QR, nombre, fecha, tipo y estado
 class TicketPage extends StatelessWidget {
   final TicketModel ticket;
   final Color typeColor;
@@ -20,7 +19,6 @@ class TicketPage extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // QR Container
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
@@ -52,7 +50,6 @@ class TicketPage extends StatelessWidget {
 
         const SizedBox(height: 5),
 
-        // Holder name
         Text(
           ticket.holderName,
           style: const TextStyle(
@@ -64,7 +61,6 @@ class TicketPage extends StatelessWidget {
 
         const SizedBox(height: 2),
 
-        // Date + Type row
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -97,7 +93,6 @@ class TicketPage extends StatelessWidget {
 
         const SizedBox(height: 4),
 
-        // Status badge
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(

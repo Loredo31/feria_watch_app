@@ -125,7 +125,6 @@ class _W03TicketsScreenState extends State<W03TicketsScreen>
       color: WatchColors.background,
       child: Column(
         children: [
-          // Header
           Container(
             padding: EdgeInsets.only(
               top: WatchMetrics.edge(context) + 10,
@@ -141,7 +140,6 @@ class _W03TicketsScreenState extends State<W03TicketsScreen>
             ),
           ),
 
-          // Indicadores de página
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(ticketsList.length, (i) {
@@ -162,7 +160,6 @@ class _W03TicketsScreenState extends State<W03TicketsScreen>
 
           const SizedBox(height: 4),
 
-          // PageView de boletos
           Expanded(
             child: PageView.builder(
               controller: _pageController,
@@ -202,7 +199,6 @@ class _W03TicketsScreenState extends State<W03TicketsScreen>
             ),
           ),
 
-          // Hint de deslizar
           if (ticketsList.length > 1)
             const Padding(
               padding: EdgeInsets.only(bottom: 4),
@@ -220,7 +216,6 @@ class _W03TicketsScreenState extends State<W03TicketsScreen>
               ),
             ),
 
-          // Botón de regreso — hasta el final de la pantalla
           Padding(
             padding: EdgeInsets.only(bottom: WatchMetrics.edge(context) + 6),
             child: GestureDetector(

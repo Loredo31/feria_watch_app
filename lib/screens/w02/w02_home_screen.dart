@@ -71,7 +71,6 @@ class _W02HomeScreenState extends State<W02HomeScreen>
   Widget build(BuildContext context) {
     final watchState = context.watch<WatchState>();
     
-    // Encontrar el próximo evento upcoming en la agenda del usuario
     final next = watchState.agendaEvents.where((e) => e.status == EventStatus.upcoming).firstOrNull ??
                  (watchState.agendaEvents.isNotEmpty ? watchState.agendaEvents.first : null);
 
@@ -91,7 +90,6 @@ class _W02HomeScreenState extends State<W02HomeScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Hora + etiqueta
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -134,7 +132,6 @@ class _W02HomeScreenState extends State<W02HomeScreen>
 
                 const SizedBox(height: 5),
 
-                // Tarjeta del próximo evento
                 if (next != null)
                   NextEventCard(event: next, countdown: _countdown)
                 else
@@ -171,7 +168,6 @@ class _W02HomeScreenState extends State<W02HomeScreen>
 
                 const SizedBox(height: 6),
 
-                // Botón QR
                 GestureDetector(
                   onTap: widget.onQrTap,
                   child: Container(
@@ -210,7 +206,6 @@ class _W02HomeScreenState extends State<W02HomeScreen>
 
                 const SizedBox(height: 5),
 
-                // Botón Agenda
                 GestureDetector(
                   onTap: widget.onAgendaTap,
                   child: Container(

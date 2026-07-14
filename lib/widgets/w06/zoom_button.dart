@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/watch_theme.dart';
 
-/// Botón de zoom circular para el mapa (+ o -)
 class ZoomButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;

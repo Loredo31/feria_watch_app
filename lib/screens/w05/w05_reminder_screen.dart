@@ -37,7 +37,6 @@ class W05ReminderScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Campana animada
               const AnimatedBell(),
 
               const SizedBox(height: 6),
@@ -76,7 +75,6 @@ class W05ReminderScreen extends StatelessWidget {
 
               const SizedBox(height: 6),
 
-              // Badge de tiempo restante
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(

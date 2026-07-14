@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../theme/watch_theme.dart';
 import '../../models/models.dart';
 
-/// Ícono de alerta animado con escala pulsante
 class AlertIcon extends StatelessWidget {
   final Animation<double> scaleAnim;
   final AlertUrgency urgency;

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../theme/watch_theme.dart';
 import '../../models/models.dart';
 
-/// Tarjeta compacta que muestra el próximo evento con cuenta regresiva
 class NextEventCard extends StatelessWidget {
   final AgendaEvent event;
   final int countdown;

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../theme/watch_theme.dart';
 import '../../models/models.dart';
 
-/// Fila de evento individual en la lista de agenda
 class EventTile extends StatelessWidget {
   final AgendaEvent event;
   final Color statusColor;
@@ -45,7 +44,6 @@ class EventTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Time column
             SizedBox(
               width: 34,
               child: Text(
@@ -58,7 +56,6 @@ class EventTile extends StatelessWidget {
               ),
             ),
 
-            // Vertical line
             Container(
               width: 2,
               height: 26,
@@ -70,7 +67,6 @@ class EventTile extends StatelessWidget {
 
             const SizedBox(width: 7),
 
-            // Event info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,7 +98,6 @@ class EventTile extends StatelessWidget {
               ),
             ),
 
-            // Status dot
             Container(
               width: 6,
               height: 6,

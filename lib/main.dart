@@ -34,7 +34,6 @@ class FeriaWatchApp extends StatelessWidget {
   }
 }
 
-/// Navigator state for screens
 enum WatchScreen {
   w01Pairing,
   w02Home,
@@ -62,7 +61,6 @@ class _WatchSimulatorPageState extends State<WatchSimulatorPage> {
     setState(() {
       _previous = _current;
       _current = screen;
-      // Reset detail state when navigating away to general screens
       if (screen != WatchScreen.w04Agenda && screen != WatchScreen.w06Map) {
         _selectedAgendaEvent = null;
         _highlightedMapLocation = null;
@@ -152,7 +150,6 @@ class _WatchSimulatorPageState extends State<WatchSimulatorPage> {
   Widget build(BuildContext context) {
     final watchState = context.watch<WatchState>();
 
-    // Control de flujo reactivo automático basado en conexión y sesión del teléfono
     if (!watchState.isLoggedIn || !watchState.wearConnected) {
       if (_current != WatchScreen.w01Pairing) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -173,7 +170,6 @@ class _WatchSimulatorPageState extends State<WatchSimulatorPage> {
       });
     }
 
-    // Auto-disparadores de alertas y recordatorios entrantes
     if (watchState.activeAlert != null && 
         _current != WatchScreen.w07Alert && 
         _current != WatchScreen.w06Map) {

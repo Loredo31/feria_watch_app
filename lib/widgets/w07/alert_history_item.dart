@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../theme/watch_theme.dart';
 import '../../models/models.dart';
 
-/// Ítem individual en el historial de alertas
 class AlertHistoryItem extends StatelessWidget {
   final AlertModel alert;
   final VoidCallback onTap;

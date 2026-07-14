@@ -99,7 +99,6 @@ class _WatchButtonState extends State<WatchButton>
   }
 }
 
-/// Botón circular de "regresar" para encabezados de pantalla
 class WatchBackButton extends StatelessWidget {
   final VoidCallback onTap;
 

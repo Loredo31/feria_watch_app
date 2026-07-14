@@ -27,7 +27,6 @@ class W01PairingScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Animación reloj ↔ teléfono
               const PairingAnimation(),
 
               const SizedBox(height: 8),

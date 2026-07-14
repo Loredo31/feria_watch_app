@@ -23,23 +23,13 @@ class WatchColors {
   static const metalGradientEnd = Color(0xFFB0B0D0);
 }
 
-/// Medidas seguras para pantallas redondas de smartwatch.
-///
-/// En vez de usar paddings fijos en píxeles (pensados para un tamaño de
-/// reloj específico), estas funciones calculan el espacio como un
-/// porcentaje del tamaño real de la pantalla. Así el mismo diseño se ve
-/// bien tanto en un Wear OS "Small Round" como en un "Large Round",
-/// sin que el contenido quede recortado por las esquinas redondeadas.
 class WatchMetrics {
-  /// Espacio lateral seguro (evita que el texto toque el borde curvo).
   static double side(BuildContext context) =>
       MediaQuery.sizeOf(context).width * 0.11;
 
-  /// Espacio superior/inferior seguro para pantallas con encabezado propio.
   static double edge(BuildContext context) =>
       MediaQuery.sizeOf(context).height * 0.065;
 
-  /// Ancho/alto disponible de la pantalla actual.
   static Size screenSize(BuildContext context) => MediaQuery.sizeOf(context);
 }
 

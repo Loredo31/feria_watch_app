@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/watch_theme.dart';
 
-/// Botones temporales de simulación para navegar a W-05 y W-07
 class SimulationButtons extends StatelessWidget {
   final VoidCallback onReminderTap;
   final VoidCallback onAlertTap;
