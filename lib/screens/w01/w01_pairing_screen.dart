@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../theme/watch_theme.dart';
 import '../../widgets/widgets.dart';
 import '../../providers/watch_state.dart';
+import '../../shared/widgets/widgets.dart';
 
 class W01PairingScreen extends StatelessWidget {
   final VoidCallback onPaired;
@@ -13,7 +14,7 @@ class W01PairingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final watchState = context.watch<WatchState>();
 
-    return Container(
+    return PageScaffold(
       decoration: const BoxDecoration(
         gradient: RadialGradient(
           center: Alignment.center,
@@ -21,49 +22,47 @@ class W01PairingScreen extends StatelessWidget {
           colors: [Color(0xFFEDE8FF), WatchColors.background],
         ),
       ),
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: WatchMetrics.side(context)),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const PairingAnimation(),
+      body: SafeScroll(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const PairingAnimation(),
 
-              const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-              const Text(
-                'Abre la app en tu teléfono e inicia sesión para vincular',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: WatchColors.textSecondary,
-                  fontSize: 9,
-                  height: 1.4,
-                ),
+            const Text(
+              'Abre la app en tu teléfono e inicia sesión para vincular',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: WatchColors.textSecondary,
+                fontSize: 9,
+                height: 1.4,
               ),
+            ),
 
-              const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-              StatusIndicator(
-                label: watchState.connectionStatus,
-                type: watchState.connectionType,
-              ),
+            StatusIndicator(
+              label: watchState.connectionStatus,
+              type: watchState.connectionType,
+            ),
 
-              const SizedBox(height: 10),
+            const SizedBox(height: 10),
 
-              WatchButton(
-                label: 'VINCULAR AHORA',
-                onTap: () {
-                  watchState.connect();
-                  watchState.requestManualSync();
-                },
-                color: WatchColors.primary,
-                icon: Icons.bluetooth,
-              ),
-            ],
-          ),
+            WatchButton(
+              label: 'VINCULAR AHORA',
+              onTap: () {
+                watchState.connect();
+                watchState.requestManualSync();
+              },
+              color: WatchColors.primary,
+              icon: Icons.bluetooth,
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
 
